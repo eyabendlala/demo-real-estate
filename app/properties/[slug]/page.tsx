@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${property.title} | ${property.price} | Denver Real Estate Portal`,
+    title: `${property.title} | ${property.price} | Denver Real Estate portal`,
     description: property.excerpt || property.description.slice(0, 160),
   };
 }
