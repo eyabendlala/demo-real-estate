@@ -222,7 +222,8 @@ export async function fetchAllWordPressProperties(): Promise<PropertyListing[]> 
     const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     const res = await fetch(`${WP_API_BASE}/wp-json/wp/v2/estate_property?per_page=20&_embed`, {
-      next: { revalidate: 30 },
+      next: { revalidate: 1 },
+      //cache: 'no-store',
       signal: controller.signal,
     });
 
@@ -260,16 +261,24 @@ export async function fetchAllWordPressProperties(): Promise<PropertyListing[]> 
 
       const address = `${area}, ${city}, CO`;
 
-      // Synchronized catalog mapping based on CMS ID or fallback catalog match
-      const catalogInfo = PROPERTY_CMS_CATALOG[id];
       const fallbackMatch = DENVER_REAL_PROPERTIES_FALLBACK.find((item) => item.id === id || item.slug === slug);
 
-      let price = catalogInfo ? catalogInfo.price : fallbackMatch ? fallbackMatch.price : DEFAULT_CATALOG_ITEM.price;
-      let priceNumeric = catalogInfo
-        ? catalogInfo.priceNumeric
-        : fallbackMatch
-        ? fallbackMatch.priceNumeric
-        : DEFAULT_CATALOG_ITEM.priceNumeric;
+      // Dynamic price extraction from live WordPress custom meta field (property_price or headless_details)
+      let rawPriceStr = post.property_price || post.headless_details?.price || '';
+      let price = fallbackMatch ? fallbackMatch.price : DEFAULT_CATALOG_ITEM.price;
+      let priceNumeric = fallbackMatch ? fallbackMatch.priceNumeric : DEFAULT_CATALOG_ITEM.priceNumeric;
+
+      if (rawPriceStr !== '' && rawPriceStr !== null && rawPriceStr !== undefined) {
+        const cleanStr = String(rawPriceStr).trim();
+        const num = Number(cleanStr.replace(/[^0-9.]/g, ''));
+        if (!isNaN(num) && num > 0) {
+          priceNumeric = num;
+          // Format with dollar sign and commas if raw string was purely numeric
+          price = /^[0-9,.]+$/.test(cleanStr) ? `$${num.toLocaleString()}` : cleanStr;
+        } else {
+          price = cleanStr;
+        }
+      }
 
       // Title-based price extraction if a currency pattern is explicitly included in the title
       const titlePriceMatch = title.match(/(?:S\$|\$)\s*(\d[\d,]*)/);
@@ -281,23 +290,21 @@ export async function fetchAllWordPressProperties(): Promise<PropertyListing[]> 
         }
       }
 
-      const bedrooms = catalogInfo
-        ? catalogInfo.bedrooms
-        : fallbackMatch
-        ? fallbackMatch.bedrooms
-        : DEFAULT_CATALOG_ITEM.bedrooms;
-      const bathrooms = catalogInfo
-        ? catalogInfo.bathrooms
-        : fallbackMatch
-        ? fallbackMatch.bathrooms
-        : DEFAULT_CATALOG_ITEM.bathrooms;
-      const size = catalogInfo ? catalogInfo.size : fallbackMatch ? fallbackMatch.size : DEFAULT_CATALOG_ITEM.size;
-      const category = catalogInfo
-        ? catalogInfo.category
-        : fallbackMatch
-        ? fallbackMatch.category
-        : DEFAULT_CATALOG_ITEM.category;
-      const status = catalogInfo ? catalogInfo.status : fallbackMatch ? fallbackMatch.status : DEFAULT_CATALOG_ITEM.status;
+      // Dynamic status extraction from custom taxonomy (property_status / headless_details)
+      const dynamicStatus =
+        (Array.isArray(post.property_status) && post.property_status.length > 0 ? post.property_status[0] : '') ||
+        post.headless_details?.status;
+      const status = dynamicStatus || (fallbackMatch ? fallbackMatch.status : DEFAULT_CATALOG_ITEM.status);
+
+      // Dynamic category/type extraction from custom taxonomy (property_type / headless_details)
+      const dynamicCategory =
+        (Array.isArray(post.property_type) && post.property_type.length > 0 ? post.property_type[0] : '') ||
+        post.headless_details?.category;
+      const category = dynamicCategory || (fallbackMatch ? fallbackMatch.category : DEFAULT_CATALOG_ITEM.category);
+
+      const bedrooms = post.headless_details?.bedrooms || (fallbackMatch ? fallbackMatch.bedrooms : DEFAULT_CATALOG_ITEM.bedrooms);
+      const bathrooms = post.headless_details?.bathrooms || (fallbackMatch ? fallbackMatch.bathrooms : DEFAULT_CATALOG_ITEM.bathrooms);
+      const size = post.headless_details?.size || (fallbackMatch ? fallbackMatch.size : DEFAULT_CATALOG_ITEM.size);
 
       return {
         id,
