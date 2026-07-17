@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   fetchPropertyBySlug,
   fetchAllWordPressProperties,
@@ -107,11 +108,14 @@ export default async function PropertyDetailPage({ params }: Props) {
 
               {/* Property Image Gallery */}
               <div className="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                <div className="h-72 sm:h-96 w-full">
-                  <img
+                <div className="relative h-72 sm:h-96 w-full">
+                  <Image
                     src={property.mainImage}
                     alt={property.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover"
                   />
                 </div>
               </div>

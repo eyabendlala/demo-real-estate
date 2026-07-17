@@ -222,7 +222,7 @@ export async function fetchAllWordPressProperties(): Promise<PropertyListing[]> 
     const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     const res = await fetch(`${WP_API_BASE}/wp-json/wp/v2/estate_property?per_page=20&_embed`, {
-      next: { revalidate: 1 },
+      next: { revalidate: 30 },
       //cache: 'no-store',
       signal: controller.signal,
     });
