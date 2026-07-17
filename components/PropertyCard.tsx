@@ -6,9 +6,12 @@ import { Bed, Bath, Maximize2, MapPin } from 'lucide-react';
 
 interface PropertyCardProps {
   property: PropertyListing;
+  priority?: boolean;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({ property, priority = false }: PropertyCardProps) {
+  const isLcpImage = priority || property.slug === 'euhabitat' || property.title.toLowerCase().includes('euhabitat');
+
   return (
     <Link
       href={`/properties/${property.slug}`}
@@ -21,6 +24,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             src={property.mainImage}
             alt={property.title}
             fill
+            priority={isLcpImage ? true : false}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />

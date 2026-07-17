@@ -113,7 +113,7 @@ export default async function PropertyDetailPage({ params }: Props) {
                     src={property.mainImage}
                     alt={property.title}
                     fill
-                    priority
+                    priority={true}
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     className="object-cover"
                   />
