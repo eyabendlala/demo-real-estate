@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { PropertyListing } from '@/types/wordpress';
 import { Bed, Bath, Maximize2, MapPin } from 'lucide-react';
 
@@ -16,10 +17,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       <div>
         {/* Main Image */}
         <div className="relative h-56 overflow-hidden bg-gray-100">
-          <img
+          <Image
             src={property.mainImage}
             alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 flex gap-2">
             <span className="px-2.5 py-1 rounded bg-[#66bb92] text-white text-xs font-semibold uppercase tracking-wide shadow-sm">

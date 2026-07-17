@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Send, CheckCircle2, Phone, Mail } from 'lucide-react';
 
 interface ContactFormProps {
@@ -65,9 +66,11 @@ export default function ContactForm({ propertyTitle }: ContactFormProps) {
 
       {/* AGENT PROFILE SECTION RIGHT ABOVE FORM FIELDS */}
       <div className="flex items-center gap-3.5 p-3.5 mb-5 rounded-xl bg-gray-50 border border-gray-100">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
           alt="Maria Barlow"
+          width={48}
+          height={48}
           className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
         />
         <div>
